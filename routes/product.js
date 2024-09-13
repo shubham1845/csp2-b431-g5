@@ -41,12 +41,11 @@ router.patch(
 );
 
 // Search product by name route
-router.post("/search-by-name", verify, productController.searchProductByName);
+router.post("/search-by-name", productController.searchProductByName);
 
 // Search product by price range route
 router.post(
   "/search-by-price",
-  verify,
   productController.searchProductByPriceRange
 );
 
