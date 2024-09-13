@@ -1,9 +1,7 @@
 const Cart = require("../models/Cart");
 const Product = require("../models/Product"); // Assuming you'll want to validate the product
 
-
 ///retrive cart controller
-
 module.exports.retrieveCart = async (req, res) => {
   try {
     // Extract user ID from the validated JWT token
