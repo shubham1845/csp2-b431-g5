@@ -1,5 +1,9 @@
 const Cart = require("../models/Cart");
 const Product = require("../models/Product"); // Assuming you'll want to validate the product
+
+
+///retrive cart controller
+
 module.exports.retrieveCart = async (req, res) => {
   try {
     // Extract user ID from the validated JWT token
@@ -12,11 +16,27 @@ module.exports.retrieveCart = async (req, res) => {
       return res.status(404).json({ message: "No cart found for this user" });
     }
 
-    // If cart is found, send the cart data
-    return res
-      .status(200)
-      .json({ message: "Items in the cart retrieved successfully", cart });
-      console.log(cart)
+    // Populate cart items with product details (name, price, etc.)
+    const cartWithProductDetails = await Promise.all(
+      cart.cartItems.map(async (item) => {
+        const product = await Product.findById(item.productId);
+        return {
+          productId: item.productId,
+          productName: product ? product.name : "Product not found",
+          quantity: item.quantity,
+          subtotal: item.subtotal,
+        };
+      })
+    );
+
+    // Respond with the cart details including the product names
+    return res.status(200).json({
+      message: "Items in the cart retrieved successfully",
+      cart: {
+        ...cart.toObject(),
+        cartItems: cartWithProductDetails,
+      },
+    });
   } catch (error) {
     // Catch any errors that occur during the process
     return res
@@ -24,6 +44,7 @@ module.exports.retrieveCart = async (req, res) => {
       .json({ message: "An error occurred", error: error.message });
   }
 };
+
 
 module.exports.addToCart = async (req, res) => {
   try {
