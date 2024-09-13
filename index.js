@@ -17,12 +17,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // Customizing cors options to meet specific requirements
 const corsOptions = {
-  origin: ["http://localhost:5173"], // Allow requests from this origin
+  origin: ["http://localhost:8000"], // Allow requests from this origin
   credentials: true, // allow credentials
   optionsSuccessStatus: 200, // Provide a status code to use for successful OPTIONS request
 };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+app.use(cors());
+
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_STRING);
