@@ -12,6 +12,10 @@ const orderSchema = new Schema({
         type: String,
         required: [true, "Product ID is required"],
       },
+      productName: {
+        type: String,
+        required: true,
+      },
       quantity: {
         type: Number,
         required: [true, "Quantity is required"],

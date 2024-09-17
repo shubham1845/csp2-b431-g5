@@ -1,5 +1,7 @@
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
+const Product = require("../models/Product"); // Make sure to require your Product model
+
 const auth = require("../auth");
 module.exports.checkout = async (req, res) => {
   try {
@@ -63,10 +65,41 @@ exports.myOrder = async (req, res) => {
         .json({ message: "No orders found for this user." });
     }
 
-    // 3. Send the found orders to the client
-    res.status(200).json(orders);
+    // 3. Populate the product names in the orders
+    const populatedOrders = await Promise.all(
+      orders.map(async (order) => {
+        const populatedProducts = await Promise.all(
+          order.productsOrdered.map(async (product) => {
+            console.log("Fetching product details for ID:", product.productId); // Debugging
+
+            const productDetails = await Product.findById(
+              product.productId
+            ).select("name");
+
+            if (!productDetails) {
+              console.log(`Product with ID ${product.productId} not found!`); // Debugging
+            }
+
+            return {
+              ...product.toObject(),
+              productName: productDetails
+                ? productDetails.name
+                : "Unknown Product",
+            };
+          })
+        );
+        return {
+          ...order.toObject(),
+          productsOrdered: populatedProducts,
+        };
+      })
+    );
+
+    // 4. Send the orders with populated product names to the client
+    res.status(200).json(populatedOrders);
   } catch (error) {
-    // 4. Catch and send errors
+    // 5. Catch and send errors
+    console.error("Error while fetching orders:", error.message); // Debugging
     res.status(500).json({
       message: "An error occurred while retrieving the orders.",
       error: error.message,
