@@ -155,7 +155,7 @@ module.exports.requestPasswordReset = async (req, res) => {
     const secret = user._id + process.env.JWT_SECRET_KEY;
     const token = jwt.sign({ userID: user._id }, secret, { expiresIn: "60s" });
 
-    const resetUrl = `https://e-market-ashy.vercel.app/users/reset-password/${user._id}/${token}`;
+    const resetUrl = `http://localhost:5173/users/reset-password/${user._id}/${token}`;
 
     // Setup transporter for nodemailer
     const transporter = nodemailer.createTransport({
