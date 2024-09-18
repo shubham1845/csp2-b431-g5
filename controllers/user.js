@@ -134,75 +134,115 @@ module.exports.loginUser = (req, res) => {
   }
 };
 
-// Controller for request password change through mail/notification
+
+// Controller for requesting a password reset
 module.exports.requestPasswordReset = async (req, res) => {
   const { email } = req.body;
-  if (email) {
-    const user = await User.findOne({ email: email });
-    if (user) {
-      const secret = user._id + process.env.JWT_SECRET_KEY;
-      const token = jwt.sign({ userID: user._id }, secret, {
-        expiresIn: "15m",
-      });
-      const resetUrl = `http://localhost:3000/api/user/reset/${user._id}/${token}`;
-      console.log(resetUrl);
-      const transporter = nodemailer.createTransport({
-        service: "Gmail",
-        secure: true,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-      const mailOptions = {
-        from: process.env.EMAIL_FROM,
-        to: user.email,
-        subject: "Password Reset Request",
-        text: `You requested a password reset. Please click the following resetUrl to reset your password: ${resetUrl}`,
-      };
-
-      await transporter.sendMail(mailOptions);
-
-      res
-        .status(200)
-        .json({ message: "Password reset resetUrl sent to email." });
-    } else {
-      res.send({ status: "failed", message: "Email doesn't exists" });
+  try {
+    if (!email) {
+      return res
+        .status(400)
+        .json({ status: "failed", message: "Email is required" });
     }
-  } else {
-    res.send({ status: "failed", message: "Email Field is Required" });
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ status: "failed", message: "Email does not exist" });
+    }
+
+    const secret = user._id + process.env.JWT_SECRET_KEY;
+    const token = jwt.sign({ userID: user._id }, secret, { expiresIn: "60s" });
+
+    const resetUrl = `http://localhost:5173/users/reset-password/${user._id}/${token}`;
+
+    // Setup transporter for nodemailer
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to: user.email,
+      subject: "Password Reset Request",
+      text: `You requested a password reset. Click this link to reset your password: ${resetUrl}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: "Password reset link sent to email." });
+  } catch (error) {
+    console.error("Error in requestPasswordReset:", error);
+    res
+      .status(500)
+      .json({ status: "failed", message: "Internal server error" });
   }
 };
 
-// controller for reset password
+// Controller for resetting the password
 module.exports.resetPassword = async (req, res) => {
   const { password, password_confirmation } = req.body;
   const { id, token } = req.params;
-  const user = await User.findById(id);
-  const new_secret = user._id + process.env.JWT_SECRET_KEY;
+
   try {
-    jwt.verify(token, new_secret);
-    if (password && password_confirmation) {
-      if (password !== password_confirmation) {
-        res.send({
+    const user = await User.findById(id);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ status: "failed", message: "User not found" });
+    }
+
+    const secret = user._id + process.env.JWT_SECRET_KEY;
+
+    // Verifying the token and catching any token errors like expiration
+    try {
+      jwt.verify(token, secret);
+    } catch (err) {
+      if (err.name === "TokenExpiredError") {
+        return res.status(400).json({
           status: "failed",
-          message: "New Password and Confirm New Password doesn't match",
+          message: "Token has expired, please request a new reset link",
         });
       } else {
-        const salt = await bcrypt.genSalt(10);
-        const newHashPassword = await bcrypt.hash(password, salt);
-        await User.findByIdAndUpdate(user._id, {
-          $set: { password: newHashPassword },
-        });
-        res.send({ status: "success", message: "Password Reset Successfully" });
+        return res
+          .status(400)
+          .json({ status: "failed", message: "Invalid token" });
       }
-    } else {
-      res.send({ status: "failed", message: "All Fields are Required" });
     }
+
+    // Validate passwords
+    if (!password || !password_confirmation) {
+      return res
+        .status(400)
+        .json({ status: "failed", message: "All fields are required" });
+    }
+
+    if (password !== password_confirmation) {
+      return res
+        .status(400)
+        .json({ status: "failed", message: "Passwords do not match" });
+    }
+
+    // Hash new password and update user
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    await User.findByIdAndUpdate(user._id, { password: hashedPassword });
+
+    return res
+      .status(200)
+      .json({ status: "success", message: "Password reset successfully" });
   } catch (error) {
-    console.log(error);
-    res.send({ status: "failed", message: "Invalid Token" });
+    console.error("Error in resetPassword:", error);
+    return res
+      .status(500)
+      .json({ status: "failed", message: "Internal server error" });
   }
 };
 

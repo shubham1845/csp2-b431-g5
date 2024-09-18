@@ -25,7 +25,6 @@ const corsOptions = {
 // app.use(cors(corsOptions));
 app.use(cors());
 
-
 // Database Connection
 mongoose.connect(process.env.MONGODB_STRING);
 
