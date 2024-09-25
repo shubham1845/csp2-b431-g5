@@ -155,8 +155,8 @@ module.exports.requestPasswordReset = async (req, res) => {
     const secret = user._id + process.env.JWT_SECRET_KEY;
     const token = jwt.sign({ userID: user._id }, secret, { expiresIn: "60s" });
 
-    const resetUrl = `https://csp3-b431-singh-rai.vercel.app/users/reset-password/${user._id}/${token}`; //for versel
-     // const resetUrl = `https://e-market-92lg.onrender.com/users/reset-password/${user._id}/${token}`; //for render
+    // const resetUrl = `https://csp3-b431-singh-rai.vercel.app/users/reset-password/${user._id}/${token}`; //for versel
+     const resetUrl = `https://e-market-92lg.onrender.com/users/reset-password/${user._id}/${token}`; //for render
 
     // Setup transporter for nodemailer
     const transporter = nodemailer.createTransport({
