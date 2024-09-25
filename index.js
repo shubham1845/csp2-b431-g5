@@ -22,15 +22,15 @@ app.use(express.urlencoded({ extended: true }));
 //   optionsSuccessStatus: 200, // Provide a status code to use for successful OPTIONS request
 // };
 
-const corsOptions = {
-   origin: 'https://e-market-ashy.vercel.app',
-  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-  credentials: true
- };
+// const corsOptions = {
+//    origin: 'https://e-market-ashy.vercel.app',
+//   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+//   credentials: true
+//  };
 
 
-app.use(cors(corsOptions));
-// app.use(cors());
+// app.use(cors(corsOptions));
+app.use(cors());
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_STRING);
