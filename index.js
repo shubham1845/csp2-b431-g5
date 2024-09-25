@@ -16,14 +16,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Customizing cors options to meet specific requirements
-const corsOptions = {
-  origin: ["http://localhost:8000"], // Allow requests from this origin
-  credentials: true, // allow credentials
-  optionsSuccessStatus: 200, // Provide a status code to use for successful OPTIONS request
-};
+// const corsOptions = {
+//   origin: ["http://localhost:8000"], // Allow requests from this origin
+//   credentials: true, // allow credentials
+//   optionsSuccessStatus: 200, // Provide a status code to use for successful OPTIONS request
+// };
+app.use(cors({
+  origin: 'https://e-market-ashy.vercel.app',
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  credentials: true
+}));
 
-// app.use(cors(corsOptions));
-app.use(cors());
+app.use(cors(corsOptions));
+// app.use(cors());
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_STRING);
