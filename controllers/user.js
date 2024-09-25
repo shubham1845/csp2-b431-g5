@@ -42,7 +42,7 @@ const sendConfirmationEmail = async (user) => {
   });
 
   const confirmationUrl = `http://localhost:3000/api/auth/confirm-email/${user.confirmationToken}`;
-  console.log(confirmationUrl);
+  // console.log(confirmationUrl);
   const mailOptions = {
     from: process.env.EMAIL_FROM,
     to: user.email,
@@ -155,8 +155,8 @@ module.exports.requestPasswordReset = async (req, res) => {
     const secret = user._id + process.env.JWT_SECRET_KEY;
     const token = jwt.sign({ userID: user._id }, secret, { expiresIn: "60s" });
 
-    // const resetUrl = `http://localhost:5173/users/reset-password/${user._id}/${token}`; //for localhost
-    const resetUrl = `https://e-market-ashy.vercel.app/users/reset-password/${user._id}/${token}`; //for render
+    const resetUrl = `http://localhost:5173/users/reset-password/${user._id}/${token}`; //for localhost
+    // const resetUrl = `https://e-market-ashy.vercel.app/users/reset-password/${user._id}/${token}`; //for render
 
     // Setup transporter for nodemailer
     const transporter = nodemailer.createTransport({
