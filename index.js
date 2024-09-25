@@ -21,11 +21,13 @@ app.use(express.urlencoded({ extended: true }));
 //   credentials: true, // allow credentials
 //   optionsSuccessStatus: 200, // Provide a status code to use for successful OPTIONS request
 // };
-app.use(cors({
-  origin: 'https://e-market-ashy.vercel.app',
+
+const corsOptions = {
+   origin: 'https://e-market-ashy.vercel.app',
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   credentials: true
-}));
+ };
+
 
 app.use(cors(corsOptions));
 // app.use(cors());
