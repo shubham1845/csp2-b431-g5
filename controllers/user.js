@@ -41,8 +41,7 @@ const sendConfirmationEmail = async (user) => {
     },
   });
 
-  const confirmationUrl = `http://localhost:3000/users/confirm-email/${user.confirmationToken}`;
-  console.log(confirmationUrl);
+  const confirmationUrl = `https://csp3-b431-singh-rai.onrender.com/users/confirm-email/${user.confirmationToken}`;
   const mailOptions = {
     from: process.env.EMAIL_FROM,
     to: user.email,
@@ -60,28 +59,6 @@ const sendConfirmationEmail = async (user) => {
     }
   });
 };
-
-// module.exports.confirmEmail = (req, res) => {
-//   const { token } = req.params;
-
-//   User.findOne({ confirmationToken: token })
-//     .then((user) => {
-//       if (!user) {
-//         return res.status(400).send({ message: "Invalid or expired token." });
-//       }
-
-//       user.emailConfirmed = true;
-//       user.confirmationToken = ""; // Clear the token
-
-//       return user
-//         .save()
-//         .then(() =>
-//           res.status(200).send({ message: "Email confirmed successfully." })
-//         )
-//         .catch((error) => res.status(500).send({ error: error.message }));
-//     })
-//     .catch((error) => res.status(500).send({ error: error.message }));
-// };
 
 module.exports.confirmEmail = (req, res) => {
   const { token } = req.params;
@@ -184,7 +161,7 @@ module.exports.requestPasswordReset = async (req, res) => {
     const secret = user._id + process.env.JWT_SECRET_KEY;
     const token = jwt.sign({ userID: user._id }, secret, { expiresIn: "60s" });
 
-    const resetUrl = `http://localhost:5173/users/reset-password/${user._id}/${token}`;
+    const resetUrl = `https://csp3-b431-singh-rai.onrender.com/users/reset-password/${user._id}/${token}`;
 
     // Setup transporter for nodemailer
     const transporter = nodemailer.createTransport({
