@@ -7,16 +7,26 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 module.exports.registerUser = (req, res) => {
-  let newUser = new User({
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    mobileNo: req.body.mobileNo,
-    password: bcrypt.hashSync(req.body.password, 10), // Encrypt password
-  });
+  // Check if email is already registered
+  User.findOne({ email: req.body.email })
+    .then((existingUser) => {
+      if (existingUser) {
+        return res.status(400).send({
+          message: "Email is already registered. Please use a different email.",
+        });
+      }
 
-  return newUser
-    .save()
+      // If email is not registered, proceed to create a new user
+      let newUser = new User({
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        mobileNo: req.body.mobileNo,
+        password: bcrypt.hashSync(req.body.password, 10), // Encrypt password
+      });
+
+      return newUser.save();
+    })
     .then((result) => {
       // Send email confirmation
       sendConfirmationEmail(result);
